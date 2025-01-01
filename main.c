@@ -153,7 +153,6 @@ struct Node* parse_exp(char* expression)
   }
 
   printf("Parsing expression: %s\n", expression);
-  fflush(stdout);
 
   struct Tuple t = parse_add_sub(expression);
   if (t.node == NULL || t.expression == NULL) {
