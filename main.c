@@ -36,14 +36,17 @@ void free_tree(struct Node* node)
 struct Node* create_node(int operand, char operator_char, enum ValueType type)
 {
   struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
-  if (newNode == NULL) {
+  if (newNode == NULL)
+  {
     return NULL;
   }
 
-  if (type == OPERAND) {
+  if (type == OPERAND)
+  {
     newNode->operand = operand;
   }
-  else {
+  else
+  {
     newNode->operator = operator_char;
   }
   newNode->type = type;
@@ -80,12 +83,14 @@ struct Tuple parse_mult_div(char* expression);
 
 struct Tuple parse_parenthesis(char* expression)
 {
-  if (!expression || !*expression) {
+  if (!expression || !*expression)
+  {
     struct Tuple t = { NULL, expression };
     return t;
   }
 
-  if (*expression == '(') {
+  if (*expression == '(')
+  {
     expression++;
     struct Tuple result = parse_add_sub(expression);
     if (result.expression && *result.expression == ')') {
@@ -148,14 +153,16 @@ struct Tuple parse_add_sub(char* expression)
 
 struct Node* parse_exp(char* expression)
 {
-  if (expression == NULL) {
+  if (expression == NULL)
+  {
     return NULL;
   }
 
   printf("Parsing expression: %s\n", expression);
 
   struct Tuple t = parse_add_sub(expression);
-  if (t.node == NULL || t.expression == NULL) {
+  if (t.node == NULL || t.expression == NULL)
+  {
     if (t.node != NULL) {
       free_tree(t.node);
     }
@@ -189,10 +196,12 @@ double resolve_tree(struct Node* root)
       result = left_result * right_result;
       break;
     case '/':
-      if (right_result != 0) {
+      if (right_result != 0)
+      {
         result = left_result / right_result;
       }
-      else {
+      else
+      {
         printf("Error: Division by zero!\n");
         result = 0;
       }
@@ -213,7 +222,8 @@ void print_tree(struct Node* node)
   {
     printf("%d", node->operand);
   }
-  else {
+  else
+  {
     printf("(");
     print_tree(node->left);
     printf(" %c ", node->operator);
@@ -232,7 +242,8 @@ int main(void)
 
   struct Node* result = parse_exp(expression);
 
-  if (result != NULL) {
+  if (result != NULL)
+  {
     printf("Result tree: ");
     print_tree(result);
     printf("\n");
@@ -242,7 +253,8 @@ int main(void)
 
     free_tree(result);
   }
-  else {
+  else
+  {
     printf("Failed to parse expression\n");
   }
 
