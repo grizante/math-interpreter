@@ -79,7 +79,8 @@ struct Tuple parse_numeric(char* expression)
 
 struct Tuple parse_parenthesis(char* expression);
 struct Tuple parse_add_sub(char* expression);
-struct Tuple parse_mult_div(char* expression);
+struct Tuple parse_mult_div_mod(char* expression);
+struct Tuple parse_exp_rad(char* expression);
 
 struct Tuple parse_parenthesis(char* expression)
 {
@@ -101,13 +102,38 @@ struct Tuple parse_parenthesis(char* expression)
   return parse_numeric(expression);
 }
 
-struct Tuple parse_mult_div(char* expression)
+struct Tuple parse_mult_div_mod(char* expression)
+{
+  struct Tuple t = parse_exp_rad(expression);
+  struct Node* left = t.node;
+  expression = t.expression;
+
+  while (*expression == '/' || *expression == '*' || *expression == '%')
+  {
+    char op = *expression;
+    expression++;
+
+    struct Tuple right_result = parse_exp_rad(expression);
+    struct Node* right = right_result.node;
+    expression = right_result.expression;
+
+    struct Node* node = create_node(0, op, OPERATOR);
+    node->left = left;
+    node->right = right;
+    left = node;
+  }
+
+  struct Tuple result_exp = { left, expression };
+  return result_exp;
+}
+
+struct Tuple parse_exp(char* expression)
 {
   struct Tuple t = parse_parenthesis(expression);
   struct Node* left = t.node;
   expression = t.expression;
 
-  while (*expression == '/' || *expression == '*')
+  while (*expression == '^')
   {
     char op = *expression;
     expression++;
@@ -128,7 +154,7 @@ struct Tuple parse_mult_div(char* expression)
 
 struct Tuple parse_add_sub(char* expression)
 {
-  struct Tuple t = parse_mult_div(expression);
+  struct Tuple t = parse_mult_div_mod(expression);
   struct Node* left = t.node;
   expression = t.expression;
 
@@ -137,7 +163,7 @@ struct Tuple parse_add_sub(char* expression)
     char op = *expression;
     expression++;
 
-    struct Tuple right_result = parse_mult_div(expression);
+    struct Tuple right_result = parse_mult_div_mod(expression);
     struct Node* right = right_result.node;
     expression = right_result.expression;
 
@@ -195,6 +221,17 @@ double resolve_tree(struct Node* root)
     case '*':
       result = left_result * right_result;
       break;
+    case '%':
+      result = (int) left_result % (int) right_result;
+      break;
+    case '^':
+      int base = left_result;
+      for (int i = 0; i < right_result; i++)
+      {
+        left_result = left_result * base;
+      }
+      result = left_result;
+      break;
     case '/':
       if (right_result != 0)
       {
@@ -237,7 +274,7 @@ int main(void)
 {
   printf("Initializing program...\n");
 
-  char* expression = "1+2";
+  char* expression = "3^2+2";
   printf("Expression loaded: %s\n", expression);
 
   struct Node* result = parse_exp(expression);
