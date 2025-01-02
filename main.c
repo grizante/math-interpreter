@@ -80,7 +80,7 @@ struct Tuple parse_numeric(char* expression)
 struct Tuple parse_parenthesis(char* expression);
 struct Tuple parse_add_sub(char* expression);
 struct Tuple parse_mult_div_mod(char* expression);
-struct Tuple parse_exp_rad(char* expression);
+struct Tuple parse_exp(char* expression);
 
 struct Tuple parse_parenthesis(char* expression)
 {
@@ -104,7 +104,7 @@ struct Tuple parse_parenthesis(char* expression)
 
 struct Tuple parse_mult_div_mod(char* expression)
 {
-  struct Tuple t = parse_exp_rad(expression);
+  struct Tuple t = parse_exp(expression);
   struct Node* left = t.node;
   expression = t.expression;
 
@@ -113,7 +113,7 @@ struct Tuple parse_mult_div_mod(char* expression)
     char op = *expression;
     expression++;
 
-    struct Tuple right_result = parse_exp_rad(expression);
+    struct Tuple right_result = parse_exp(expression);
     struct Node* right = right_result.node;
     expression = right_result.expression;
 
@@ -177,7 +177,7 @@ struct Tuple parse_add_sub(char* expression)
   return result;
 }
 
-struct Node* parse_exp(char* expression)
+struct Node* parse(char* expression)
 {
   if (expression == NULL)
   {
@@ -277,7 +277,7 @@ int main(void)
   char* expression = "3^2+2";
   printf("Expression loaded: %s\n", expression);
 
-  struct Node* result = parse_exp(expression);
+  struct Node* result = parse(expression);
 
   if (result != NULL)
   {
