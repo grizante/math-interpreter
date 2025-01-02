@@ -35,24 +35,24 @@ void free_tree(struct Node* node)
 
 struct Node* create_node(int operand, char operator_char, enum ValueType type)
 {
-  struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
-  if (newNode == NULL)
+  struct Node* new_node = (struct Node*)malloc(sizeof(struct Node));
+  if (new_node == NULL)
   {
     return NULL;
   }
 
   if (type == OPERAND)
   {
-    newNode->operand = operand;
+    new_node->operand = operand;
   }
   else
   {
-    newNode->operator = operator_char;
+    new_node->operator = operator_char;
   }
-  newNode->type = type;
-  newNode->left = NULL;
-  newNode->right = NULL;
-  return newNode;
+  new_node->type = type;
+  new_node->left = NULL;
+  new_node->right = NULL;
+  return new_node;
 }
 
 struct Tuple parse_numeric(char* expression)
