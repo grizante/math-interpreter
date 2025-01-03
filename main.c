@@ -94,7 +94,8 @@ struct Tuple parse_parenthesis(char* expression)
   {
     expression++;
     struct Tuple result = parse_add_sub(expression);
-    if (result.expression && *result.expression == ')') {
+    if (result.expression && *result.expression == ')')
+    {
       result.expression++;
     }
     return result;
