@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <ctype.h>
 
 enum ValueType {
   OPERAND,
@@ -23,8 +24,23 @@ struct Tuple {
   char* expression;
 };
 
-void free_tree(struct Node* node)
-{
+void trim(char* str) {
+  char* src = str;
+  char* dst = str;
+
+  while (*src) {
+    if (!isspace((unsigned char)*src)) {
+      *dst = *src;
+      dst++;
+    }
+
+    src++;
+  }
+
+  *dst = '\0';
+}
+
+void free_tree(struct Node* node) {
   if (node == NULL) return;
 
   free_tree(node->left);
@@ -33,20 +49,16 @@ void free_tree(struct Node* node)
   free(node);
 }
 
-struct Node* create_node(int operand, char operator_char, enum ValueType type)
-{
+struct Node* create_node(int operand, char operator_char, enum ValueType type) {
   struct Node* new_node = (struct Node*)malloc(sizeof(struct Node));
-  if (new_node == NULL)
-  {
+  if (new_node == NULL) {
     return NULL;
   }
 
-  if (type == OPERAND)
-  {
+  if (type == OPERAND) {
     new_node->operand = operand;
   }
-  else
-  {
+  else {
     new_node->operator = operator_char;
   }
   new_node->type = type;
@@ -55,19 +67,16 @@ struct Node* create_node(int operand, char operator_char, enum ValueType type)
   return new_node;
 }
 
-struct Tuple parse_numeric(char* expression)
-{
+struct Tuple parse_numeric(char* expression) {
   struct Tuple t = { NULL, expression };
   if (!expression || !*expression) return t;
 
-  if (!isdigit(*expression))
-  {
+  if (!isdigit(*expression)) {
     return t;
   }
 
   int value = 0;
-  while (isdigit(*expression))
-  {
+  while (isdigit(*expression)) {
     value = value * 10 + (*expression - '0');
     expression++;
   }
@@ -82,20 +91,16 @@ struct Tuple parse_add_sub(char* expression);
 struct Tuple parse_mult_div_mod(char* expression);
 struct Tuple parse_exp(char* expression);
 
-struct Tuple parse_parenthesis(char* expression)
-{
-  if (!expression || !*expression)
-  {
+struct Tuple parse_parenthesis(char* expression) {
+  if (!expression || !*expression) {
     struct Tuple t = { NULL, expression };
     return t;
   }
 
-  if (*expression == '(')
-  {
+  if (*expression == '(') {
     expression++;
     struct Tuple result = parse_add_sub(expression);
-    if (result.expression && *result.expression == ')')
-    {
+    if (result.expression && *result.expression == ')') {
       result.expression++;
     }
     return result;
@@ -103,14 +108,12 @@ struct Tuple parse_parenthesis(char* expression)
   return parse_numeric(expression);
 }
 
-struct Tuple parse_mult_div_mod(char* expression)
-{
+struct Tuple parse_mult_div_mod(char* expression) {
   struct Tuple t = parse_exp(expression);
   struct Node* left = t.node;
   expression = t.expression;
 
-  while (*expression == '/' || *expression == '*' || *expression == '%')
-  {
+  while (*expression == '/' || *expression == '*' || *expression == '%') {
     char op = *expression;
     expression++;
 
@@ -128,14 +131,12 @@ struct Tuple parse_mult_div_mod(char* expression)
   return result_exp;
 }
 
-struct Tuple parse_exp(char* expression)
-{
+struct Tuple parse_exp(char* expression) {
   struct Tuple t = parse_parenthesis(expression);
   struct Node* left = t.node;
   expression = t.expression;
 
-  while (*expression == '^')
-  {
+  while (*expression == '^') {
     char op = *expression;
     expression++;
 
@@ -153,14 +154,12 @@ struct Tuple parse_exp(char* expression)
   return result_exp;
 }
 
-struct Tuple parse_add_sub(char* expression)
-{
+struct Tuple parse_add_sub(char* expression) {
   struct Tuple t = parse_mult_div_mod(expression);
   struct Node* left = t.node;
   expression = t.expression;
 
-  while (*expression == '+' || *expression == '-')
-  {
+  while (*expression == '+' || *expression == '-') {
     char op = *expression;
     expression++;
 
@@ -178,18 +177,17 @@ struct Tuple parse_add_sub(char* expression)
   return result;
 }
 
-struct Node* parse(char* expression)
-{
-  if (expression == NULL)
-  {
+struct Node* parse(char expression[]) {
+  if (expression == NULL) {
     return NULL;
   }
+
+  trim(expression);
 
   printf("Parsing expression: %s\n", expression);
 
   struct Tuple t = parse_add_sub(expression);
-  if (t.node == NULL || t.expression == NULL)
-  {
+  if (t.node == NULL || t.expression == NULL) {
     if (t.node != NULL) {
       free_tree(t.node);
     }
@@ -199,8 +197,7 @@ struct Node* parse(char* expression)
   return t.node;
 }
 
-double resolve_tree(struct Node* root)
-{
+double resolve_tree(struct Node* root) {
   if (root == NULL) return 0;
 
   if (root->type == OPERAND) return root->operand;
@@ -209,10 +206,8 @@ double resolve_tree(struct Node* root)
   double right_result = resolve_tree(root->right);
 
   double result;
-  if (root->type == OPERATOR)
-  {
-    switch (root->operator)
-    {
+  if (root->type == OPERATOR) {
+    switch (root->operator) {
     case '+':
       result = left_result + right_result;
       break;
@@ -223,23 +218,20 @@ double resolve_tree(struct Node* root)
       result = left_result * right_result;
       break;
     case '%':
-      result = (int) left_result % (int) right_result;
+      result = (int)left_result % (int)right_result;
       break;
     case '^':
       int base = left_result;
-      for (int i = 0; i < right_result; i++)
-      {
+      for (int i = 0; i < right_result; i++) {
         left_result = left_result * base;
       }
       result = left_result;
       break;
     case '/':
-      if (right_result != 0)
-      {
+      if (right_result != 0) {
         result = left_result / right_result;
       }
-      else
-      {
+      else {
         printf("Error: Division by zero!\n");
         result = 0;
       }
@@ -253,15 +245,12 @@ double resolve_tree(struct Node* root)
   return result;
 }
 
-void print_tree(struct Node* node)
-{
+void print_tree(struct Node* node) {
   if (node == NULL) return;
-  if (node->type == OPERAND)
-  {
+  if (node->type == OPERAND) {
     printf("%d", node->operand);
   }
-  else
-  {
+  else {
     printf("(");
     print_tree(node->left);
     printf(" %c ", node->operator);
@@ -270,18 +259,15 @@ void print_tree(struct Node* node)
   }
 }
 
-/*The expression must be passed without spaces*/
-int main(void)
-{
+int main(void) {
   printf("Initializing program...\n");
 
-  char* expression = "3^2+2";
+  char expression[] = " 3 ^ 2 + 2 ";
   printf("Expression loaded: %s\n", expression);
 
   struct Node* result = parse(expression);
 
-  if (result != NULL)
-  {
+  if (result != NULL) {
     printf("Result tree: ");
     print_tree(result);
     printf("\n");
@@ -291,8 +277,7 @@ int main(void)
 
     free_tree(result);
   }
-  else
-  {
+  else {
     printf("Failed to parse expression\n");
   }
 
